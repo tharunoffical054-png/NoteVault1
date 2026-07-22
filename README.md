@@ -1,7 +1,7 @@
 
-  # 3D Futuristic Login (Community)
+  # NoteVaultApp
 
-  This is a code bundle for 3D Futuristic Login (Community). The original project is available at https://www.figma.com/design/54LT7HBZoYAOPnaArBbx22/3D-Futuristic-Login--Community-.
+  This is a code bundle for NoteVaultApp. The original project is available at https://www.figma.com/design/54LT7HBZoYAOPnaArBbx22/NoteVaultApp.
 
   ## Running the code
 

@@ -905,6 +905,7 @@ function LampCordRight({ lampOn, onToggle }: { lampOn: boolean; onToggle: () => 
   const dragStartY = useRef(0);
   const MAX_PULL = 130;
   const TRIGGER_THRESHOLD = 65;
+  const CORD_BASE = 72;
 
   const onKnobPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     setIsDragging(true);
@@ -913,8 +914,7 @@ function LampCordRight({ lampOn, onToggle }: { lampOn: boolean; onToggle: () => 
   };
   const onKnobPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging) return;
-    const delta = Math.max(0, Math.min(MAX_PULL, e.clientY - dragStartY.current));
-    setPullDistance(delta);
+    setPullDistance(Math.max(0, Math.min(MAX_PULL, e.clientY - dragStartY.current)));
   };
   const onKnobPointerUp = () => {
     if (!isDragging) return;
@@ -924,33 +924,86 @@ function LampCordRight({ lampOn, onToggle }: { lampOn: boolean; onToggle: () => 
   };
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 w-12 flex flex-col items-center justify-start pt-8 z-40" style={{ background: 'transparent' }}>
-      {/* Sun/Moon icon */}
-      <div className="mb-2">
-        {lampOn ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-gray-500" />}
+    <div
+      className="fixed right-0 top-0 bottom-0 z-40 flex flex-col items-center"
+      style={{ width: '56px', pointerEvents: 'none' }}
+    >
+      {/* Wire from ceiling */}
+      <div style={{ width: '2px', height: '56px', background: lampOn ? '#9ca3af' : '#4b5563', transition: 'background 0.7s', pointerEvents: 'none' }} />
+
+      {/* Lamp shade assembly */}
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
+        {/* Glow halo */}
+        <motion.div
+          style={{ position: 'absolute', width: '120px', height: '120px', top: '-20px', left: '50%', transform: 'translateX(-50%)', background: 'radial-gradient(circle,rgba(255,220,80,0.65) 0%,transparent 68%)', filter: 'blur(18px)', pointerEvents: 'none' }}
+          animate={{ opacity: lampOn ? 1 : 0 }}
+          transition={{ duration: 0.55 }}
+        />
+        {/* Top rim */}
+        <div style={{ width: '44px', height: '9px', borderRadius: '3px', background: lampOn ? 'linear-gradient(90deg,#7c4a1e,#b06828,#7c4a1e)' : 'linear-gradient(90deg,#1c0f04,#3d1a08,#1c0f04)', transition: 'background 0.7s' }} />
+        {/* Shade body */}
+        <div style={{ width: '110px', height: '72px', clipPath: 'polygon(12% 0%,88% 0%,100% 100%,0% 100%)', position: 'relative', overflow: 'hidden', background: lampOn ? 'linear-gradient(180deg,#9a5520 0%,#c07030 60%,#8c4a18 100%)' : 'linear-gradient(180deg,#180902 0%,#321408 60%,#1e0b02 100%)', transition: 'background 0.7s' }}>
+          <motion.div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(255,248,160,0.95) 0%,rgba(255,200,55,0.65) 55%,rgba(255,150,20,0.18) 100%)' }} animate={{ opacity: lampOn ? 1 : 0 }} transition={{ duration: 0.5 }} />
+          {[...Array(5)].map((_, i) => <div key={i} style={{ position: 'absolute', top: 0, bottom: 0, left: `${i * 22}%`, width: '1px', background: 'rgba(0,0,0,0.12)' }} />)}
+        </div>
+        {/* Bulb */}
+        <motion.div
+          style={{ width: '22px', height: '22px', borderRadius: '50%', marginTop: '-4px' }}
+          animate={{
+            background: lampOn ? 'radial-gradient(circle at 33% 28%,#fffde4,#ffd600 48%,#ff8c00)' : 'radial-gradient(circle at 33% 28%,#555,#2a2a2a)',
+            boxShadow: lampOn ? '0 0 24px 10px rgba(255,220,40,0.9),0 0 50px 20px rgba(255,180,20,0.45)' : '0 2px 5px rgba(0,0,0,0.5)',
+          }}
+          transition={{ duration: 0.5 }}
+        />
       </div>
-      {/* Hint text rotated */}
-      <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontSize: '10px', color: lampOn ? '#ca8a04' : '#6b7280', marginBottom: '8px', userSelect: 'none' }}>
-        Pull to toggle
-      </div>
-      {/* Fixed cord line */}
-      <div style={{ width: '2px', height: '60px', background: lampOn ? '#ca8a04' : '#4b5563', transition: 'background 0.7s' }} />
-      {/* Draggable knob */}
+
+      {/* Light cone */}
+      <motion.div
+        style={{ width: '200px', height: '240px', clipPath: 'polygon(37% 0%,63% 0%,100% 100%,0% 100%)', background: 'linear-gradient(180deg,rgba(255,230,90,0.55) 0%,rgba(255,200,55,0.18) 55%,transparent 100%)', filter: 'blur(6px)', pointerEvents: 'none', marginTop: '-2px' }}
+        animate={{ opacity: lampOn ? 1 : 0 }}
+        transition={{ duration: 0.7 }}
+      />
+
+      {/* Fixed cord below shade */}
+      <div style={{ width: '2px', height: `${CORD_BASE}px`, background: lampOn ? '#9ca3af' : '#6b7280', transition: 'background 0.7s', marginTop: '-220px', pointerEvents: 'none' }} />
+
+      {/* Draggable: extension cord + knob */}
       <div
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', transform: `translateY(${pullDistance}px)`, transition: isDragging ? 'none' : 'transform 0.52s cubic-bezier(0.34,1.56,0.64,1)', cursor: isDragging ? 'grabbing' : 'grab', userSelect: 'none' }}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', transform: `translateY(${pullDistance}px)`, transition: isDragging ? 'none' : 'transform 0.52s cubic-bezier(0.34,1.56,0.64,1)', cursor: isDragging ? 'grabbing' : 'grab', userSelect: 'none', marginTop: `${CORD_BASE - 2}px`, pointerEvents: 'all' }}
         onPointerDown={onKnobPointerDown}
         onPointerMove={onKnobPointerMove}
         onPointerUp={onKnobPointerUp}
         onPointerCancel={onKnobPointerUp}
       >
-        <div style={{ width: '2px', height: `${30 + pullDistance * 0.35}px`, background: lampOn ? '#ca8a04' : '#4b5563', transition: isDragging ? 'none' : 'height 0.52s,background 0.7s' }} />
+        {/* Stretching cord */}
+        <div style={{ width: '2px', height: `${38 + pullDistance * 0.45}px`, background: lampOn ? '#9ca3af' : '#6b7280', transition: isDragging ? 'none' : 'height 0.52s cubic-bezier(0.34,1.56,0.64,1),background 0.7s' }} />
+
+        {/* Knob */}
         <motion.div
           whileHover={{ scale: 1.18 }}
-          style={{ width: '30px', height: '30px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${lampOn ? '#ffd700' : '#4b5563'}`, background: lampOn ? 'radial-gradient(circle at 32% 28%,#fffde0,#ffd700 48%,#b8860b)' : 'radial-gradient(circle at 32% 28%,#888,#444)', boxShadow: lampOn ? '0 0 14px 5px rgba(255,215,0,0.65)' : '0 4px 10px rgba(0,0,0,0.5)', transition: 'background 0.5s,border-color 0.5s,box-shadow 0.5s' }}
+          style={{ width: '34px', height: '34px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${lampOn ? '#ffd700' : '#4b5563'}`, background: lampOn ? 'radial-gradient(circle at 32% 28%,#fffde0,#ffd700 48%,#b8860b)' : 'radial-gradient(circle at 32% 28%,#888,#444)', boxShadow: lampOn ? '0 0 16px 6px rgba(255,215,0,0.65),inset 0 1px 3px rgba(255,255,200,0.5)' : '0 4px 12px rgba(0,0,0,0.65),inset 0 1px 2px rgba(255,255,255,0.08)', transition: 'background 0.5s,border-color 0.5s,box-shadow 0.5s' }}
         >
-          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: lampOn ? 'rgba(255,255,220,0.92)' : 'rgba(255,255,255,0.18)' }} />
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: lampOn ? 'rgba(255,255,220,0.92)' : 'rgba(255,255,255,0.18)', transition: 'background 0.5s' }} />
         </motion.div>
+
+        {/* Release hint */}
+        {isDragging && pullDistance >= TRIGGER_THRESHOLD && (
+          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: '8px', padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 600, background: 'rgba(255,215,0,0.18)', border: '1px solid rgba(255,215,0,0.5)', color: '#ffd700', whiteSpace: 'nowrap' }}>
+            {lampOn ? 'Turn off' : 'Turn on!'}
+          </motion.div>
+        )}
       </div>
+
+      {/* Pulse hint when idle */}
+      {!isDragging && (
+        <motion.p
+          animate={{ opacity: [0.4, 0.9, 0.4] }}
+          transition={{ duration: 2.8, repeat: Infinity }}
+          style={{ position: 'absolute', bottom: '24px', fontSize: '9px', writingMode: 'vertical-rl', transform: 'rotate(180deg)', color: lampOn ? '#ca8a04' : '#4b5563', userSelect: 'none', pointerEvents: 'none', transition: 'color 0.7s' }}
+        >
+          {lampOn ? '↑ pull off' : '↓ pull on'}
+        </motion.p>
+      )}
     </div>
   );
 }
@@ -980,12 +1033,13 @@ function NoteVaultApp({
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const dark = !lampOn;
-  const bg = dark ? '#030712' : '#fffbeb';
-  const textPrimary = dark ? '#f9fafb' : '#111827';
-  const textSecondary = dark ? '#9ca3af' : '#6b7280';
-  const borderColor = dark ? 'rgba(120,53,15,0.35)' : 'rgba(251,191,36,0.4)';
-  const cardBg = dark ? 'rgba(15,10,5,0.8)' : 'rgba(255,255,255,0.85)';
-  const sidebarBg = dark ? 'rgba(5,3,1,0.9)' : 'rgba(255,255,255,0.8)';
+  // Dark mode: pure black sidebar, dark navy main — matching screenshot
+  const bg = dark ? '#0d1117' : '#fffbeb';
+  const textPrimary = dark ? '#e6edf3' : '#111827';
+  const textSecondary = dark ? '#8b949e' : '#6b7280';
+  const borderColor = dark ? 'rgba(48,54,61,0.9)' : 'rgba(251,191,36,0.4)';
+  const cardBg = dark ? '#161b22' : 'rgba(255,255,255,0.85)';
+  const sidebarBg = dark ? '#000000' : 'rgba(255,255,255,0.95)';
 
   const activeNotes = notes.filter(n => !n.deleted && !n.archived);
   const deletedCount = notes.filter(n => n.deleted).length;
@@ -1031,73 +1085,103 @@ function NoteVaultApp({
     <div className="flex min-h-screen transition-colors duration-700" style={{ background: bg }}>
       {/* Background decorations */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute inset-0 transition-opacity duration-700" style={{ backgroundImage: 'linear-gradient(rgba(255,215,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,215,0,0.03) 1px,transparent 1px)', backgroundSize: '50px 50px', opacity: dark ? 1 : 0.25 }} />
-        <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.3, 0.15] }} transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(202,138,4,0.2),rgba(180,100,0,0.1))' }} />
+        {/* Subtle column grid like the screenshot */}
+        <div className="absolute inset-0 transition-opacity duration-700" style={{
+          backgroundImage: dark
+            ? 'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)'
+            : 'linear-gradient(rgba(255,215,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,215,0,0.04) 1px,transparent 1px)',
+          backgroundSize: '44px 44px',
+          opacity: dark ? 1 : 0.4,
+        }} />
+        {/* Soft amber ambient glow - light mode only */}
+        {!dark && (
+          <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.28, 0.15] }} transition={{ duration: 8, repeat: Infinity }}
+            className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(202,138,4,0.2),rgba(180,100,0,0.1))' }} />
+        )}
       </div>
 
       {/* Sidebar */}
       <motion.div
-        animate={{ width: sidebarCollapsed ? 72 : 260 }}
+        animate={{ width: sidebarCollapsed ? 72 : 280 }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="relative z-30 flex flex-col shrink-0 backdrop-blur-xl border-r"
-        style={{ background: sidebarBg, borderColor, height: '100vh', position: 'sticky', top: 0 }}
+        className="relative z-30 flex flex-col shrink-0"
+        style={{
+          background: sidebarBg,
+          borderRight: dark ? '1px solid #21262d' : '1px solid rgba(251,191,36,0.3)',
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
+        }}
       >
-        {/* Collapse button */}
-        <div className="flex items-center justify-between px-4 pt-5 pb-3">
+        {/* Logo row */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
           {!sidebarCollapsed && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 via-amber-600 to-red-900 rounded-xl flex items-center justify-center">
-                <BookOpen className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-gradient-to-br from-yellow-500 via-amber-600 to-red-900 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-900/40">
+                <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-base" style={{ color: textPrimary }}>NoteVault</span>
+              <span className="font-bold text-lg tracking-tight" style={{ color: textPrimary }}>NoteVault</span>
             </div>
           )}
-          <button onClick={() => setSidebarCollapsed(p => !p)} className="p-1.5 rounded-lg transition-colors" style={{ color: textSecondary, background: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
+          <button
+            onClick={() => setSidebarCollapsed(p => !p)}
+            className="p-2 rounded-xl transition-colors"
+            style={{ color: textSecondary, background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}
+          >
             <Menu className="w-5 h-5" />
           </button>
         </div>
 
         {/* User photo + name */}
-        <div className={`flex flex-col items-center py-4 border-b ${sidebarCollapsed ? 'px-2' : 'px-4'}`} style={{ borderColor }}>
-          <button onClick={() => photoInputRef.current?.click()} className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-yellow-500/50 hover:border-yellow-500 transition-all group mb-2">
+        <div className={`flex flex-col items-center py-5 ${sidebarCollapsed ? 'px-2' : 'px-5'}`}
+          style={{ borderBottom: dark ? '1px solid #21262d' : '1px solid rgba(251,191,36,0.2)' }}>
+          <button
+            onClick={() => photoInputRef.current?.click()}
+            className="relative rounded-full overflow-hidden group mb-3"
+            style={{ width: sidebarCollapsed ? 40 : 72, height: sidebarCollapsed ? 40 : 72, border: '3px solid', borderColor: dark ? '#ca8a04' : 'rgba(202,138,4,0.6)', transition: 'all 0.3s' }}
+          >
             {currentUser.photo ? (
               <img src={currentUser.photo} alt="user" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#ca8a04,#92400e)' }}>
-                <User className="w-7 h-7 text-white" />
+              <div className="w-full h-full flex items-center justify-center" style={{ background: dark ? 'linear-gradient(135deg,#92400e,#ca8a04)' : 'linear-gradient(135deg,#fbbf24,#d97706)' }}>
+                <User style={{ width: sidebarCollapsed ? 18 : 28, height: sidebarCollapsed ? 18 : 28, color: 'white' }} />
               </div>
             )}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Edit3 className="w-4 h-4 text-white" />
             </div>
           </button>
           <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
           {!sidebarCollapsed && (
             <>
-              <p className="text-xs" style={{ color: textSecondary }}>{language === 'EN' ? 'Welcome Back,' : 'Bienvenido,'}</p>
-              <p className="font-semibold text-sm text-center truncate w-full text-center" style={{ color: textPrimary }}>{currentUser.name}</p>
+              <p className="text-xs mb-0.5" style={{ color: textSecondary }}>{language === 'EN' ? 'Welcome Back,' : 'Bienvenido,'}</p>
+              <p className="font-bold text-sm text-center w-full truncate" style={{ color: textPrimary }}>{currentUser.name}</p>
             </>
           )}
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
           {navItems.map(item => {
             const active = page === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => { setPage(item.id); if (item.id !== 'new-note') setEditingNote(null); }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative ${sidebarCollapsed ? 'justify-center' : ''}`}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all relative ${sidebarCollapsed ? 'justify-center' : ''}`}
                 style={{
-                  background: active ? 'linear-gradient(135deg,rgba(234,179,8,0.25),rgba(153,0,0,0.15))' : 'transparent',
-                  border: active ? '1px solid rgba(234,179,8,0.3)' : '1px solid transparent',
+                  background: active
+                    ? dark ? 'linear-gradient(135deg,#78350f,#451a03)' : 'linear-gradient(135deg,rgba(234,179,8,0.2),rgba(153,0,0,0.12))'
+                    : 'transparent',
                   color: active ? '#fbbf24' : textSecondary,
                 }}
               >
-                <span className={active ? 'text-yellow-400' : ''}>{item.icon}</span>
-                {!sidebarCollapsed && <span className="font-medium text-sm">{item.label}</span>}
+                <span style={{ color: active ? '#fbbf24' : textSecondary }}>{item.icon}</span>
+                {!sidebarCollapsed && (
+                  <span className="font-medium text-sm" style={{ color: active ? '#fbbf24' : textSecondary }}>
+                    {item.label}
+                  </span>
+                )}
                 {item.badge != null && item.badge > 0 && (
                   <span className={`${sidebarCollapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} min-w-[20px] h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center px-1`}>
                     {item.badge}
@@ -1109,11 +1193,11 @@ function NoteVaultApp({
         </nav>
 
         {/* Logout */}
-        <div className="px-2 pb-4 border-t pt-4" style={{ borderColor }}>
+        <div className="px-3 pb-5 pt-3" style={{ borderTop: dark ? '1px solid #21262d' : '1px solid rgba(251,191,36,0.2)' }}>
           <button
             onClick={onLogout}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-red-500/10 ${sidebarCollapsed ? 'justify-center' : ''}`}
-            style={{ color: '#ef4444' }}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all hover:bg-red-500/10 ${sidebarCollapsed ? 'justify-center' : ''}`}
+            style={{ color: '#f87171' }}
           >
             <LogOut className="w-5 h-5" />
             {!sidebarCollapsed && <span className="font-medium text-sm">{language === 'EN' ? 'Log Out' : 'Cerrar Sesión'}</span>}

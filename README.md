@@ -2,7 +2,8 @@
 
 A modern, feature-rich note-taking web application built with React, TypeScript, and Vite. NoteVault provides an intuitive and powerful platform for creating, managing, and organizing your notes with rich text editing, attachments, and seamless cloud synchronization.
 
-![NoteVault Logo](logo.png)
+![NoteVault Logo](<img width="82" height="78" alt="note app logo" src="https://github.com/user-attachments/assets/6d0369c0-6d8a-419d-a3e0-5d1efed255f3" />)
+
 
 **Live Demo:** [https://notevaultapp-2.vercel.app](https://notevaultapp-2.vercel.app)
 
